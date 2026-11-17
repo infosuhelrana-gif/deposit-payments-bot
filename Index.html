@@ -1,0 +1,760 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deposit System</title>
+
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Arial,sans-serif}
+body{
+ padding:15px;color:white;min-height:100vh;
+ background:radial-gradient(circle at top left,#244c8b55,transparent 45%),linear-gradient(145deg,#071326,#142d55);
+}
+.container{width:100%;max-width:440px;margin:auto}
+.hidden{display:none!important}
+button{border:0;cursor:pointer;font-weight:bold;border-radius:10px}
+
+/* MAIN PAGE */
+#mainPage{
+ min-height:calc(100vh - 30px);
+ display:flex;flex-direction:column;
+}
+.balance{
+ display:flex;justify-content:space-between;align-items:center;
+ padding:22px;border-radius:18px;margin-bottom:16px;
+ background:linear-gradient(135deg,#2463c7,#173778);
+ box-shadow:0 8px 25px #0004;
+}
+.balance small{color:#dce8ff}
+.amount{font-size:28px;font-weight:bold;margin-top:8px}
+.history-btn{background:white;color:#173778;padding:12px}
+
+.panel{
+ background:#172945;padding:20px;border-radius:18px;
+ border:1px solid #ffffff20;
+}
+#mainPage .panel{
+ flex:1;min-height:max(650px,calc(100vh - 180px));
+ display:flex;flex-direction:column;
+}
+h2{margin:0 0 22px;font-size:21px}
+
+/* PAYMENT METHODS */
+.methods{
+ display:grid;
+ grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:8px;margin-bottom:24px;
+}
+.method{
+ min-width:0;padding:12px 3px;
+ background:#243a5d;color:white;
+ border:2px solid transparent;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ gap:8px;font-size:13px;
+ transition:.2s;
+}
+.method img{
+ width:39px;height:39px;
+ object-fit:contain;
+ background:white;border-radius:10px;
+ padding:4px;
+}
+.method.active{
+ border-color:white;
+ background:#304d77;
+ transform:translateY(-2px);
+ box-shadow:0 4px 12px #0004;
+}
+
+/* QUICK AMOUNTS */
+.amount-title{font-size:15px;margin-bottom:12px;color:#dce8ff}
+.amount-options{
+ display:grid;grid-template-columns:repeat(3,1fr);
+ gap:10px;margin-bottom:25px;
+}
+.amount-option{
+ padding:16px 5px;background:#243a5d;
+ color:white;border:2px solid transparent;font-size:16px;
+}
+.amount-option.active{
+ background:#c92170;border-color:white;
+ box-shadow:0 3px 10px #0003;
+}
+
+/* INPUT */
+input{
+ width:100%;padding:16px;border:1px solid #ccd7e4;
+ border-radius:11px;font-size:16px;
+ margin:10px 0 18px;outline:none;
+}
+input:focus{border-color:#c92170}
+
+/* BOTTOM BUTTON */
+.primary{
+ width:100%;padding:18px;color:white;
+ font-size:17px;background:#c92170;
+}
+#depositBtn{
+ margin-top:auto;min-height:58px;flex-shrink:0;
+}
+
+/* PAYMENT PAGE */
+#paymentPage{
+ background:#eff9ff;color:#343d4b;
+ min-height:100vh;margin:-15px;padding:18px;
+ padding-bottom:35px;
+}
+.pay-top{
+ display:flex;justify-content:space-between;align-items:center;
+ background:#e3f3fc;padding:14px 16px;
+ border-radius:16px;margin-bottom:16px;color:#40536b;
+}
+.pay-back,.pay-close{
+ font-size:25px;background:transparent;color:#40536b;
+}
+.amount-card{
+ display:flex;align-items:center;justify-content:space-between;
+ background:white;border-radius:20px;padding:20px;
+ margin-bottom:22px;box-shadow:0 3px 8px #00000010;
+}
+.logo{
+ width:115px;height:75px;border-radius:15px;
+ display:flex;align-items:center;justify-content:center;
+ background:#f7f8fa;padding:8px;
+}
+.logo img{max-width:100%;max-height:100%;object-fit:contain}
+.pay-amount{
+ font-size:27px;font-weight:bold;color:#4b5360;
+ border-left:1px solid #ddd;padding-left:20px;
+}
+.notice{
+ background:#f8faed;color:#9c9b79;padding:13px;
+ border-radius:8px;font-size:13px;margin-bottom:17px;
+}
+.instruction-card{
+ background:var(--paycolor);border-radius:20px;
+ padding:25px 22px;color:white;box-shadow:0 6px 14px #0002;
+}
+.instruction-card h3{
+ text-align:center;font-size:23px;font-weight:normal;
+ margin:8px 0 20px;
+}
+.instruction-card input{
+ text-align:center;font-size:17px;color:#333;margin:0 0 18px;
+}
+.instruction-title{
+ font-size:16px;font-weight:bold;
+ border-bottom:1px solid #ffffff30;
+ padding-bottom:12px;margin-bottom:12px;
+}
+.instruction{
+ padding:14px 0;border-bottom:1px solid #ffffff30;
+ line-height:1.8;font-size:15px;
+}
+.instruction:last-child{border-bottom:0}
+.highlight{color:#ffe58c;font-weight:bold}
+.number-row{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:8px;flex-wrap:wrap;
+}
+.number{font-size:16px;color:#ffe58c;font-weight:bold;word-break:break-all}
+.copy-btn{padding:10px 13px;background:#263b50;color:white}
+.verify-btn{
+ width:100%;margin-top:25px;padding:20px;
+ background:var(--paycolor);color:white;
+ font-size:18px;border-radius:20px;
+}
+
+/* HISTORY */
+#historyPage .item{
+ background:#203653;padding:14px;
+ border-radius:12px;margin-bottom:12px;
+}
+.pending{color:#ffc34d}
+.approved{color:#45d58c}
+.rejected{color:#ff7777}
+.secondary{padding:12px;background:#304666;color:white}
+
+@media(max-width:360px){
+ body{padding:12px}
+ #mainPage .panel{padding:16px;min-height:650px}
+ .amount-option{padding:14px 3px;font-size:14px}
+ .method img{width:34px;height:34px}
+ .method{font-size:11px}
+ .methods{gap:5px}
+ .pay-amount{font-size:22px;padding-left:12px}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<!-- MAIN PAGE -->
+<div id="mainPage">
+
+ <div class="balance">
+  <div>
+   <small>Available Balance</small>
+   <div class="amount" id="balance">৳ 0.00</div>
+  </div>
+  <button class="history-btn" onclick="showHistory()">History</button>
+ </div>
+
+ <div class="panel">
+  <h2>Deposit Wallet</h2> <h2>select your payment method 👇</h2>
+
+  <div class="methods">
+
+   <button class="method active" onclick="selectMethod('bKash',this)">
+    <img src="https://raw.githubusercontent.com/mdmubarokhosin/Bd-MFS-Logo/refs/heads/main/logos/png/bkash.png" alt="bKash">
+    <span>bKash</span>
+   </button>
+
+   <button class="method" onclick="selectMethod('Nagad',this)">
+    <img src="https://raw.githubusercontent.com/mdmubarokhosin/Bd-MFS-Logo/refs/heads/main/logos/png/nagad.png" alt="Nagad">
+    <span>Nagad</span>
+   </button>
+
+   <button class="method" onclick="selectMethod('Rocket',this)">
+    <img src="https://raw.githubusercontent.com/mdmubarokhosin/Bd-MFS-Logo/refs/heads/main/logos/png/rocket.png" alt="Rocket">
+    <span>Rocket</span>
+   </button>
+
+   <button class="method" onclick="selectMethod('Binance',this)">
+    <img src="https://cdn.simpleicons.org/binance/F0B90B" alt="Binance">
+    <span>Binance</span>
+   </button>
+
+  </div>
+
+  <div class="amount-title" id="amountTitle">
+   Select Deposit Amount (৳)
+  </div>
+
+  <div class="amount-options" id="amountOptions">
+   <button class="amount-option" onclick="selectAmount(20,this)">৳ 20</button>
+   <button class="amount-option" onclick="selectAmount(30,this)">৳ 30</button>
+   <button class="amount-option" onclick="selectAmount(50,this)">ট 50</button>
+   <button class="amount-option" onclick="selectAmount(80,this)">ট 80</button>
+   <button class="amount-option" onclick="selectAmount(100,this)">৳ 100</button>
+   <button class="amount-option" onclick="selectAmount(200,this)">৳ 200</button>
+   <button class="amount-option" onclick="selectAmount(300,this)">ট 300</button>
+   <button class="amount-option" onclick="selectAmount(500,this)">৳ 500</button>
+   <button class="amount-option" onclick="selectAmount(1000,this)">৳ 1000</button>
+  </div>
+
+  <label id="amountLabel">Enter Deposit Amount (৳)</label>
+
+  <input id="amount" type="number" min="20" max="10000"
+   step="1"
+   placeholder="Minimum 20 - Maximum 10000"
+   oninput="clearAmountSelection()">
+
+  <button class="primary" id="depositBtn" onclick="continueDeposit()">
+   Deposit Now
+  </button>
+
+ </div>
+</div>
+
+<!-- PAYMENT PAGE -->
+<div id="paymentPage" class="hidden">
+
+ <div class="pay-top">
+  <button class="pay-back" onclick="goHome()">←</button>
+  <b>Payment</b>
+  <button class="pay-close" onclick="goHome()">×</button>
+ </div>
+
+ <div class="amount-card">
+  <div class="logo">
+   <img id="payLogo" src="" alt="Payment Logo">
+  </div>
+  <div class="pay-amount" id="payAmount">20 BDT</div>
+ </div>
+
+ <div class="notice" id="paymentNotice">
+  <b>নোট:</b> টাকা পাঠানোর ৫-১০ সেকেন্ড পর ভেরিফাই করবেন।
+ </div>
+
+ <div class="instruction-card">
+
+  <h3 id="paymentHeading">ট্রানজেকশন আইডি দিন</h3>
+
+  <input id="trx" placeholder="ট্রানজেকশন আইডি দিন">
+
+  <div class="instruction-title">PAYMENT INSTRUCTIONS</div>
+
+  <div class="instruction" id="instructionOne">
+   • <span class="highlight" id="dialCode">*247#</span>
+   ডায়াল করে আপনার <span class="highlight" id="brandName">BKASH</span>
+   মোবাইল মেনুতে যান অথবা অ্যাপে যান।
+  </div>
+
+  <div class="instruction" id="instructionTwo">
+   • <span class="highlight">Send Money</span> -এ ক্লিক করুন।
+  </div>
+
+  <div class="instruction">
+   • প্রাপক নম্বর / Wallet Address:
+   <div class="number-row">
+    <span class="number" id="payNumber">01XXXXXXXXX</span>
+    <button class="copy-btn" onclick="copyNumber()">▣ Copy</button>
+   </div>
+  </div>
+
+  <div class="instruction" id="instructionThree">
+   • পরিমাণ: <span class="highlight" id="instructionAmount">20</span>
+   টাকা দিয়ে SUBMIT করুন।
+  </div>
+
+  <div class="instruction" id="instructionFour">
+   • এখন উপরের বক্সে আপনার Transaction ID দিন এবং VERIFY করুন।
+  </div>
+
+ </div>
+
+ <button class="verify-btn" onclick="submitDeposit()">
+  VERIFY TRANSACTION
+ </button>
+
+</div>
+
+<!-- HISTORY PAGE -->
+<div id="historyPage" class="hidden">
+
+ <button class="secondary" onclick="goHome()">← Back</button>
+
+ <div class="panel" style="margin-top:15px">
+  <h2>Deposit History</h2>
+  <h2> Please wait, your balance will be added within five minutes.</h2>
+  <div id="historyList"></div>
+  
+ </div>
+
+</div>
+
+</div>
+
+<script>
+
+let selectedMethod="bKash";
+let depositAmount=0;
+
+const paymentNumbers={
+
+ bKash:"01XXXXXXXXX",
+
+ Nagad:"01XXXXXXXXX",
+
+ Rocket:"01XXXXXXXXX",
+
+ // এখানে তোমার Binance USDT Wallet Address বসাবে
+ Binance:"466556585"
+
+};
+
+const themes={
+
+ bKash:{
+  color:"#c92170",
+  brand:"BKASH",
+  dial:"*247#",
+  logo:"https://raw.githubusercontent.com/mdmubarokhosin/Bd-MFS-Logo/refs/heads/main/logos/png/bkash.png",
+  currency:"BDT",
+  symbol:"৳",
+  min:20,
+  max:10000,
+  amounts:[20,30,50,80,100,200,300,500,1000]
+ },
+
+ Nagad:{
+  color:"#ed790c",
+  brand:"NAGAD",
+  dial:"*167#",
+  logo:"https://raw.githubusercontent.com/mdmubarokhosin/Bd-MFS-Logo/refs/heads/main/logos/png/nagad.png",
+  currency:"BDT",
+  symbol:"৳",
+  min:20,
+  max:10000,
+  amounts:[20,30,50,80,100,200,300,500,1000]
+ },
+
+ Rocket:{
+  color:"#8b3ab7",
+  brand:"ROCKET",
+  dial:"*322#",
+  logo:"https://raw.githubusercontent.com/mdmubarokhosin/Bd-MFS-Logo/refs/heads/main/logos/png/rocket.png",
+  currency:"BDT",
+  symbol:"৳",
+  min:20,
+  max:10000,
+  amounts:[20,30,50,80,100,200,300,500,1000]
+ },
+
+ Binance:{
+  color:"#F0B90B",
+  brand:"BINANCE",
+  dial:"USDT",
+  logo:"https://cdn.simpleicons.org/binance/F0B90B",
+  currency:"USDT",
+  symbol:"$",
+  min:0.2,
+  max:10000,
+  amounts:[0.2,0.3,0.4,0.5,1,2,3,4,5,10,20,50]
+ }
+
+};
+
+
+// METHOD SELECT
+function selectMethod(method,button){
+
+ selectedMethod=method;
+
+ document.querySelectorAll(".method")
+ .forEach(b=>b.classList.remove("active"));
+
+ button.classList.add("active");
+
+ const t=themes[method];
+
+ document.getElementById("depositBtn").style.background=t.color;
+
+ // Update currency and amount options
+ document.getElementById("amountTitle").textContent=
+ method==="Binance"?
+ "Select Deposit Amount (USDT)":
+ "Select Deposit Amount (৳)";
+
+ document.getElementById("amountLabel").textContent=
+ method==="Binance"?
+ "Enter Deposit Amount (USDT)":
+ "Enter Deposit Amount (৳)";
+
+ const input=document.getElementById("amount");
+
+ input.value="";
+ input.min=t.min;
+ input.max=t.max;
+ input.step=method==="Binance"?"0.01":"1";
+
+ input.placeholder=method==="Binance"?
+ "Minimum 0.2 - Maximum 10000 USDT":
+ "Minimum 20 - Maximum 10000 BDT";
+
+ // Update quick amounts
+ const options=document.getElementById("amountOptions");
+
+ options.innerHTML=t.amounts.map(value=>`
+  <button class="amount-option"
+  onclick="selectAmount(${value},this)">
+  ${t.symbol} ${value}
+  </button>
+ `).join("");
+
+}
+
+
+// SELECT AMOUNT
+function selectAmount(amount,button){
+
+ document.getElementById("amount").value=amount;
+
+ document.querySelectorAll(".amount-option")
+ .forEach(b=>b.classList.remove("active"));
+
+ button.classList.add("active");
+}
+
+
+// CLEAR AMOUNT SELECTION
+function clearAmountSelection(){
+
+ document.querySelectorAll(".amount-option")
+ .forEach(b=>b.classList.remove("active"));
+
+}
+
+
+// CONTINUE DEPOSIT
+function continueDeposit(){
+
+ const t=themes[selectedMethod];
+
+ const amount=Number(document.getElementById("amount").value);
+
+ if(!Number.isFinite(amount)||
+ amount<t.min||amount>t.max||
+ (selectedMethod!=="Binance"&&!Number.isInteger(amount))){
+
+  alert(selectedMethod==="Binance"?
+  "সর্বনিম্ন ০.১ এবং সর্বোচ্চ ১০,০০০ USDT দিতে পারবেন।":
+  "সর্বনিম্ন ২০ এবং সর্বোচ্চ ১০,০০০ টাকা দিতে পারবেন।");
+
+  return;
+ }
+
+ if(selectedMethod==="Binance" &&
+ paymentNumbers.Binance==="YOUR_BINANCE_USDT_WALLET_ADDRESS"){
+
+  alert("প্রথমে কোডে তোমার Binance USDT Wallet Address বসাও।");
+  return;
+ }
+
+ depositAmount=amount;
+
+ document.documentElement.style.setProperty("--paycolor",t.color);
+
+ document.getElementById("payLogo").src=t.logo;
+
+ document.getElementById("payLogo").alt=selectedMethod+" Logo";
+
+ document.getElementById("brandName").textContent=t.brand;
+
+ document.getElementById("dialCode").textContent=t.dial;
+
+ document.getElementById("payNumber").textContent=
+ paymentNumbers[selectedMethod];
+
+ document.getElementById("payAmount").textContent=
+ selectedMethod==="Binance"?
+ amount.toFixed(2)+" USDT":
+ amount+" BDT";
+
+ document.getElementById("instructionAmount").textContent=
+ selectedMethod==="Binance"?
+ amount.toFixed(2)+" USDT":
+ amount;
+
+ const heading=document.getElementById("paymentHeading");
+
+ const notice=document.getElementById("paymentNotice");
+
+ const trx=document.getElementById("trx");
+
+ if(selectedMethod==="Binance"){
+
+  heading.textContent="Binance Transaction ID দিন";
+
+  notice.innerHTML=
+  "<b>নোট:</b> সঠিক Network নির্বাচন করে USDT পাঠান। টাকা পাঠানোর পর Transaction ID দিন।";
+
+  trx.placeholder="Binance Transaction ID / TxID দিন";
+
+  document.getElementById("instructionOne").innerHTML=
+  "• Binance অ্যাপ খুলুন এবং Wallet থেকে USDT নির্বাচন করুন।";
+
+  document.getElementById("instructionTwo").innerHTML=
+  "• Withdraw / Send অপশন নির্বাচন করে USDT পাঠান।";
+
+  document.getElementById("instructionThree").innerHTML=
+  "• পরিমাণ: <span class='highlight'>"+
+  amount.toFixed(2)+
+  " USDT</span> পাঠান।";
+
+  document.getElementById("instructionFour").innerHTML=
+  "• সঠিক Network ব্যবহার করুন এবং Transaction ID দিয়ে VERIFY করুন।";
+
+ }else{
+
+  heading.textContent="ট্রানজেকশন আইডি দিন";
+
+  notice.innerHTML=
+  "<b>নোট:</b> টাকা পাঠানোর ৫-১০ সেকেন্ড পর ভেরিফাই করবেন।";
+
+  trx.placeholder="ট্রানজেকশন আইডি দিন";
+
+  document.getElementById("instructionOne").innerHTML=
+  "• <span class='highlight'>"+t.dial+
+  "</span> ডায়াল করে আপনার <span class='highlight'>"+
+  t.brand+"</span> মোবাইল মেনুতে যান অথবা অ্যাপে যান।";
+
+  document.getElementById("instructionTwo").innerHTML=
+  "• <span class='highlight'>Send Money</span> -এ ক্লিক করুন।";
+
+  document.getElementById("instructionThree").innerHTML=
+  "• পরিমাণ: <span class='highlight'>"+
+  amount+" টাকা</span> দিয়ে SUBMIT করুন।";
+
+  document.getElementById("instructionFour").innerHTML=
+  "• এখন উপরের বক্সে আপনার Transaction ID দিন এবং VERIFY করুন।";
+
+ }
+
+ trx.value="";
+
+ showPage("paymentPage");
+
+}
+
+
+// COPY NUMBER / WALLET
+function copyNumber(){
+
+ const number=paymentNumbers[selectedMethod];
+
+ if(navigator.clipboard){
+
+  navigator.clipboard.writeText(number)
+  .then(()=>alert("Wallet Address / নম্বর কপি হয়েছে"))
+  .catch(()=>alert("নম্বর: "+number));
+
+ }else{
+
+  alert("নম্বর: "+number);
+
+ }
+
+}
+
+
+// SUBMIT DEPOSIT
+function submitDeposit(){
+
+ const trx=document.getElementById("trx").value.trim();
+
+ if(!trx){
+  alert("Transaction ID লিখুন");
+  return;
+ }
+
+ let history=JSON.parse(
+ localStorage.getItem("depositHistory")||"[]"
+ );
+
+ if(history.some(x=>x.trx===trx)){
+
+  alert("এই Transaction ID আগেই জমা হয়েছে");
+  return;
+
+ }
+
+ history.unshift({
+
+  method:selectedMethod,
+
+  amount:depositAmount,
+
+  currency:themes[selectedMethod].currency,
+
+  trx:trx,
+
+  status:"Pending",
+
+  date:new Date().toLocaleString()
+  
+
+ });
+
+ localStorage.setItem(
+ "depositHistory",
+ JSON.stringify(history)
+ );
+
+ document.getElementById("trx").value="";
+
+ alert("আপনার Deposit Request জমা হয়েছে।");
+
+ showHistory();
+
+}
+
+
+// SHOW HISTORY
+function showHistory(){
+
+ const history=JSON.parse(
+ localStorage.getItem("depositHistory")||"[]"
+ );
+
+ const list=document.getElementById("historyList");
+
+ if(!history.length){
+
+  list.innerHTML="<p>এখনো কোনো Deposit History নেই।</p>";
+
+ }else{
+
+  list.innerHTML=history.map(x=>`
+
+   <div class="item">
+
+    <b>${escapeHTML(x.method)}</b>
+
+    <p>Amount: ${
+     x.currency==="USDT"?"$":"৳"
+    } ${Number(x.amount).toFixed(2)} ${
+     escapeHTML(x.currency||"BDT")
+    }</p>
+
+    <p>Transaction ID: ${escapeHTML(x.trx)}</p>
+
+    <p>Date: ${escapeHTML(x.date)}</p>
+
+    <b class="${escapeHTML(x.status.toLowerCase())}">
+     ${escapeHTML(x.status)}
+    </b>
+
+   </div>
+
+  `).join("");
+
+ }
+
+ showPage("historyPage");
+
+}
+
+
+// HTML SECURITY
+function escapeHTML(value){
+
+ return String(value).replace(/[&<>"']/g,c=>({
+
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#39;"
+
+ }[c]));
+
+}
+
+
+// PAGE NAVIGATION
+function showPage(id){
+
+ ["mainPage","paymentPage","historyPage"].forEach(x=>{
+
+  document.getElementById(x).classList.add("hidden");
+
+ });
+
+ document.getElementById(id).classList.remove("hidden");
+
+}
+
+
+function goHome(){
+
+ showPage("mainPage");
+
+}
+
+
+// INITIAL SETUP
+document.getElementById("depositBtn").style.background=
+themes.bKash.color;
+
+</script>
+
+</body>
+  </html>
+    
